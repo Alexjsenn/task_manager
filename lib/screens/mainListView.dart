@@ -4,6 +4,7 @@ import 'package:scoped_model/scoped_model.dart';
 import '../scopedModels/scoped_taskList.dart';
 import '../models/taskInfo.dart';
 import 'newTaskView.dart';
+import 'EditTaskView.dart';
 
 enum MoreChoices { Edit, Remove }
 
@@ -38,7 +39,7 @@ class listView extends StatelessWidget {
           floatingActionButton: FloatingActionButton(
             onPressed: () {
               Navigator.push( context,
-                MaterialPageRoute(builder: (context) => NewTaskPage()),
+                MaterialPageRoute(builder: (context) => NewTaskPage(-1)),
             );},
             child: Icon(Icons.add),
             backgroundColor: Colors.blue,
@@ -112,10 +113,8 @@ class listView extends StatelessWidget {
               ));
             }
             if (selected == MoreChoices.Edit) {
-              Scaffold.of(context).showSnackBar(SnackBar(
-                content: Text("Cannot edit right now"),
-                duration: const Duration(seconds: 2),
-              ));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => EditTaskPage(index)));
             }
           },
           itemBuilder: (context) => <PopupMenuEntry<MoreChoices>>[
