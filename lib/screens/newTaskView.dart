@@ -16,7 +16,7 @@ class NewTaskPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('New Task'),
       ),
-      body: EditTaskView(index: index),
+      body: EditTaskView(index: index, model: null),
     );
   }
 }

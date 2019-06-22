@@ -10,45 +10,44 @@ class EditTaskPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Task'),
-      ),
-      body: EditTaskView(index: index),
+    return ScopedModelDescendant<ScopedTaskList>(
+        builder: (context, child, model)
+        => Scaffold(
+          appBar: AppBar(
+            title: Text('Edit Task'),
+          ),
+          body: EditTaskView(index: index, model: model),
+        )
     );
   }
 }
 
 class EditTaskView extends StatefulWidget {
   int index;
-  EditTaskView({@required this.index});
+  ScopedTaskList model;
+  String taskTitle;
+  String taskDescription;
+  final DateTime currentDate = new DateTime.now();
+  DateTime Date = new DateTime.now();
+  TimeOfDay Time = new TimeOfDay.now();
+
+  EditTaskView({@required this.index, @required this.model}) {
+    if (this.model != null) {
+      taskTitle = model.getTaskAt(index).getTitle();
+      taskDescription = model.getTaskAt(index).getDescription();
+      Date = model.getTaskAt(index).getDate();
+      if (currentDate.isAfter(Date)) Date = currentDate;
+      Time = model.getTaskAt(index).getTime();
+    }
+  }
 
   @override
-  _editTaskViewState createState() => new _editTaskViewState(index);
+  _editTaskViewState createState() => new _editTaskViewState();
 }
 
 class _editTaskViewState extends State<EditTaskView> {
-  int index;
   final _formKey = GlobalKey<FormState>();
-  String _taskTitle;
-  String _taskDescription;
-  final DateTime _currentDate = new DateTime.now();
-  DateTime _Date = new DateTime.now();
-  TimeOfDay _Time = new TimeOfDay.now();
 
-  _editTaskViewState(this.index) {
-    ScopedModelDescendant<ScopedTaskList>(builder: (context, child, model) {
-      if (index >= 0) {
-        setState(() {
-          _Date = model.getTaskAt(index).getDate();
-          _Time = model.getTaskAt(index).getTime();
-          _taskTitle = model.getTaskAt(index).getTitle();
-          _taskDescription = model.getTaskAt(index).getDescription();
-          if (_currentDate.isAfter(_Date)) _Date = _currentDate;
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +74,12 @@ class _editTaskViewState extends State<EditTaskView> {
       style: TextStyle(
         height: 1.2,
       ),
-      initialValue: _taskTitle,
+      initialValue: widget.taskTitle,
       validator: (value) {
         if (value.isEmpty) {
           return 'Enter task';
         }
-        _taskTitle = value;
+        widget.taskTitle = value;
       },
       maxLines: null,
       keyboardType: TextInputType.multiline,
@@ -88,7 +87,7 @@ class _editTaskViewState extends State<EditTaskView> {
       scrollPadding: EdgeInsets.all(16.0),
       onSaved: (value) {
         setState(() {
-          _taskTitle = value;
+          widget.taskTitle = value;
         });
       },
     ));
@@ -106,20 +105,20 @@ class _editTaskViewState extends State<EditTaskView> {
       style: TextStyle(
         height: 1.2,
       ),
-      initialValue: _taskDescription,
+      initialValue: widget.taskDescription,
       maxLines: null,
       keyboardType: TextInputType.multiline,
       textCapitalization: TextCapitalization.sentences,
       scrollPadding: EdgeInsets.all(16.0),
       onSaved: (value) {
         setState(() {
-          _taskDescription = value;
+          widget.taskDescription = value;
         });
       },
       validator: (value) {
         if (value != null) {
           setState(() {
-            _taskDescription = value;
+            widget.taskDescription = value;
           });
         }
       },
@@ -128,16 +127,16 @@ class _editTaskViewState extends State<EditTaskView> {
     Future _selectDate() async {
       DateTime picked = await showDatePicker(
           context: context,
-          initialDate: _Date,
-          firstDate: _currentDate,
+          initialDate: widget.Date,
+          firstDate: widget.currentDate,
           lastDate: new DateTime(2022));
-      if (picked != null) setState(() => _Date = picked);
+      if (picked != null) setState(() => widget.Date = picked);
     }
 
     Future _selectTime() async {
       TimeOfDay picked =
-          await showTimePicker(context: context, initialTime: _Time);
-      if (picked != null) setState(() => _Time = picked);
+          await showTimePicker(context: context, initialTime: widget.Time);
+      if (picked != null) setState(() => widget.Time = picked);
     }
 
     formWidget.add(new ButtonBar(
@@ -162,7 +161,7 @@ class _editTaskViewState extends State<EditTaskView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text(
-          formatter.format(_Date) + " " + _Time.format(context),
+          formatter.format(widget.Date) + " " + widget.Time.format(context),
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         )
       ],
@@ -177,9 +176,10 @@ class _editTaskViewState extends State<EditTaskView> {
               child: new Icon(Icons.check),
               onPressed: () {
                 if (_formKey.currentState.validate()) {
-                  if (index >= 0) model.removeTaskAt(index);
+                  if (widget.index >= 0) model.removeTaskAt(widget.index);
                   model.addNewTask(
-                      new TaskInfo(_taskTitle, _taskDescription, _Date, _Time));
+                      new TaskInfo(widget.taskTitle,
+                          widget.taskDescription, widget.Date, widget.Time));
                   Navigator.of(context).pop();
                 }
               }))
