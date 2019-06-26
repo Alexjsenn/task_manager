@@ -5,6 +5,7 @@ import '../scopedModels/scoped_taskList.dart';
 import '../models/taskInfo.dart';
 import 'newTaskView.dart';
 import 'EditTaskView.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum MoreChoices { Edit, Remove }
 
@@ -25,6 +26,15 @@ class MainListView extends StatelessWidget {
 }
 
 class listView extends StatelessWidget {
+  void printMemory() async{
+    final prefs = await SharedPreferences.getInstance();
+    print("inside print mem");
+    final List<String> myList = prefs.getStringList('titleList') ?? [];
+    for(int i=0; i<myList.length;++i){
+      print(myList[i]);
+    }
+    print("exiting print mem");
+  }
 
 
   @override
@@ -38,8 +48,9 @@ class listView extends StatelessWidget {
           body: _buildList(model),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
+              printMemory();
               Navigator.push( context,
-                MaterialPageRoute(builder: (context) => NewTaskPage(-1)),
+                MaterialPageRoute(builder: (context) => NewTaskPage(-1,model)),
             );},
             child: Icon(Icons.add),
             backgroundColor: Colors.blue,

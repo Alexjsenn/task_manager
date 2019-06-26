@@ -8,8 +8,9 @@ import 'EditTaskView.dart';
 
 class NewTaskPage extends StatelessWidget {
   final int index;
-  NewTaskPage(this.index);
-
+  //NewTaskPage(this.index);
+  ScopedTaskList myList;
+  NewTaskPage(this.index,this.myList);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
