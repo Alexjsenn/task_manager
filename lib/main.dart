@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:task_manager/screens/mainListView.dart';
-
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 
 void main() => runApp(MyApp());
@@ -17,4 +17,10 @@ class MyApp extends StatelessWidget {
       home: new MainListView(),
     );
   }
+
+
+
 }
+
+
+

@@ -15,6 +15,7 @@ class TaskInfo {
     //trim removes leading and trailing whitespace
     this._title = t.trim();
     if (descr != null) this._description = descr.trim();
+    else this._description=" ";
     this._finished = false;
     this._Date = D;
     this._Time = T;
