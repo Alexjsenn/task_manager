@@ -40,13 +40,18 @@ class MainListView extends StatelessWidget {
   }
 }
 class NotificationTry extends StatefulWidget{
+  final TaskInfo _myNewTask;
+  NotificationTry(this._myNewTask);
+
   @override
-  _NotificationState createState() => _NotificationState();
+  _NotificationState createState() => _NotificationState(_myNewTask);
 }
 class _NotificationState extends State<NotificationTry>{
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final TaskInfo _myTask;
+  _NotificationState(this._myTask);
   @override
-  initState() {
+  initState(){
 
     super.initState();
     // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
@@ -58,27 +63,28 @@ class _NotificationState extends State<NotificationTry>{
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
+
     print("inside stateful");
-    // _showNotificationWithoutSound();
+
   }
 
   @override
-  build(BuildContext context){
+  build(BuildContext context) {
     print("inside statful build");
-    return  Scaffold(
-      appBar: AppBar(
-        title: Text("Second Screen with payload: "),
-      ),
-      body: Center(
-        child: RaisedButton(
-          onPressed: () async {
-            await _showNotificationWithoutSound();
-          },
-          child: Text('Go back!'),
-        ),
-      ),
-    );
+    callNotification(context);
+
+
+    return Container(width: 0,height: 0);
+
+
   }
+  void callNotification(BuildContext context) async{
+    await _showNotificationWithoutSound(_myTask);
+
+    Navigator.pop(context);
+    Navigator.pop(context);
+  }
+
 
   Future<void> onSelectNotification(String payload) async{
     showDialog(context: context,
@@ -112,9 +118,16 @@ class _NotificationState extends State<NotificationTry>{
       ),
     );
   }
-  Future<void> _showNotificationWithoutSound() async {
-    var scheduledNotificationDateTime =
-    DateTime.now().add(Duration(seconds: 10));
+  Future<void> _showNotificationWithoutSound(TaskInfo myTask) async {
+    var scheduledNotificationDateTime = myTask.getDate().add(Duration(hours:
+    -myTask.getDate().hour,minutes: -myTask.getDate().minute)).add(Duration(
+      hours:myTask.getTime().hour,minutes: myTask.getTime().minute
+    ));
+//        .add(Duration(hours:
+//      myTask.getTime().hour,minutes: myTask.getTime().minute));
+    print(scheduledNotificationDateTime);
+    print(myTask.getID());
+    //DateTime.now().add(Duration(seconds: 10));
     var vibrationPattern = Int64List(4);
     vibrationPattern[0] = 0;
     vibrationPattern[1] = 1000;
@@ -146,9 +159,9 @@ class _NotificationState extends State<NotificationTry>{
     print("before sched");
 
     await flutterLocalNotificationsPlugin.schedule(
-        0,
-        'scheduled title',
-        'scheduled body',
+        myTask.getID(),
+        myTask.getTitle(),
+        myTask.getDescription(),
         scheduledNotificationDateTime,
         platformChannelSpecifics
 
@@ -187,123 +200,24 @@ class listView extends StatelessWidget {
 
             FloatingActionButton(
             onPressed: () {
-//              printMemory();
-//              var initializationSettingsAndroid =
-//              AndroidInitializationSettings('@mipmap/ic_launcher');
-//              var initializationSettingsIOS = IOSInitializationSettings(
-//                onDidReceiveLocalNotification: onDidReceiveLocalNotification
-//              );
-//              var initializationSettings = InitializationSettings(
-//                  initializationSettingsAndroid, initializationSettingsIOS);
-//              flutterLocalNotificationsPlugin.initialize(initializationSettings,
-//                  onSelectNotification: onSelectNotification);
-               //Timer(Duration(seconds: 10),(){
-                //await _showNotificationWithoutSound();
-                //notifyListeners();
-                //NotificationTry();
-
-             // });
 
               Navigator.push( context,
                 MaterialPageRoute(builder: (context) => NewTaskPage(-1,model)),
-                //MaterialPageRoute(builder: (context) => NotificationTry()),
-            );},
+
+            );
+
+
+
+            },
             child: Icon(Icons.add),
             backgroundColor: Colors.blue,
           ),
         ));
   }
-  Future<void> onSelectNotification(String payload) async{
-    showDialog(context: null,
-               builder: (_) => new AlertDialog(title: Text("Here is payload"),
-                 content: Text("Payload : $payload"),)
-    );
-  }
-  Future<void> onDidReceiveLocalNotification(
-      int id, String title, String body, String payload) async {
-    // display a dialog with the notification details, tap ok to go to another page
-    await showDialog(
-      context: null,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text('Ok'),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SecondScreen(payload),
-                ),
-              );
-            },
-          )
-        ],
-      ),
-    );
-  }
-  Future<void> _showNotificationWithoutSound() async {
-    var scheduledNotificationDateTime =
-    DateTime.now().add(Duration(seconds: 10));
-    var vibrationPattern = Int64List(4);
-    vibrationPattern[0] = 0;
-    vibrationPattern[1] = 1000;
-    vibrationPattern[2] = 5000;
-    vibrationPattern[3] = 2000;
-
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'your other channel id',
-      'your other channel name',
-      'your other channel description',
-      //icon: 'secondary_icon',
-      //sound: 'slow_spring_board',
-      //largeIcon: 'sample_large_icon',
-      //largeIconBitmapSource: BitmapSource.Drawable,
-//      vibrationPattern: vibrationPattern,
-//      enableLights: true,
-//      color: const Color.fromARGB(255, 255, 0, 0),
-//      ledColor: const Color.fromARGB(255, 255, 0, 0),
-//      ledOnMs: 1000,
-//      ledOffMs: 500);
-        playSound: true,
-        //sound: ,
-        importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
-  var iOSPlatformChannelSpecifics =
-  IOSNotificationDetails();
-  var platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-  print("before sched");
-
-    await flutterLocalNotificationsPlugin.schedule(
-        0,
-        'scheduled title',
-        'scheduled body',
-        scheduledNotificationDateTime,
-        platformChannelSpecifics
-
-    );
-    print("inside schedule");
-
-  }
-  Future<void> _showNotification() async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'your channel id', 'your channel name', 'your channel description',
-        importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-        0, 'plain title', 'plain body', platformChannelSpecifics,
-        payload: 'item x');
-  }
-
-
 
   //creates the list view
   Widget _buildList(ScopedTaskList list) {
+
     return ListView.builder(
       itemCount: list.getSize(),
       itemBuilder: (context, index) {

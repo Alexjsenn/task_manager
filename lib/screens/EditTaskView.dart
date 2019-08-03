@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../scopedModels/scoped_taskList.dart';
 import '../models/taskInfo.dart';
-
+import 'mainListView.dart';
 class EditTaskPage extends StatelessWidget {
   final int index;
   EditTaskPage(this.index);
@@ -176,11 +176,37 @@ class _editTaskViewState extends State<EditTaskView> {
               child: new Icon(Icons.check),
               onPressed: () {
                 if (_formKey.currentState.validate()) {
-                  if (widget.index >= 0) model.removeTaskAt(widget.index);
-                  model.addNewTask(
-                      new TaskInfo(widget.taskTitle,
-                          widget.taskDescription, widget.Date, widget.Time));
-                  Navigator.of(context).pop();
+                  if (widget.index >= 0) {
+                    List<String> previousPostpones=model.getTaskAt(widget.index).getPostponeDates();
+                    model.removeTaskAt(widget.index);
+
+                    TaskInfo myNewTask=new TaskInfo.withoutID(widget.taskTitle,
+                        widget.taskDescription, widget.Date, widget.Time,previousPostpones);
+                    Navigator.push( context,
+                        MaterialPageRoute(builder: (context) => NotificationTry(myNewTask)));
+                    model.addNewTask(myNewTask);
+                  }
+                  else{
+                    TaskInfo myNewTask=new TaskInfo(widget.taskTitle,
+                        widget.taskDescription, widget.Date, widget.Time);
+                    myNewTask.setPostpone(widget.Date.add(Duration(hours:
+                    -widget.Date.hour,minutes: -widget.Date.minute)).add(Duration(
+                        hours:widget.Time.hour,minutes: widget.Time.minute)
+                    ).toString());
+                    Navigator.push( context,
+                        MaterialPageRoute(builder: (context) => NotificationTry(myNewTask)));
+                    model.addNewTask(myNewTask);
+                  }
+                  //previous task is being destroyed and new one is created
+                  // , find a way to maintain postpone list state from previous
+                  //task
+
+
+
+
+
+
+
                 }
               }))
     ]));
